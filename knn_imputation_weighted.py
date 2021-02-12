@@ -37,49 +37,9 @@ def nan_matrix(data):
             else:
                 dist_matrix[i,j] = nan_distance(data[i],data[j])
     return(dist_matrix)
-            
-
-def knn_imputation(data,n_neighbors = 2):
-    count = 0
-    ## Where are the null values in the data set
-    indexes_nan = np.argwhere(np.isnan(data))
-    n_col = data.shape[1]
-    n_row = data.shape[0]
-    final_data = data.copy()
-    for index in indexes_nan:
-        print(count)
-        count = count + 1 
-        distances = []
-        row = index[0]
-        col = index[1]
-        x = data[row]
-        for i in range(n_row):
-            if(i==row):
-                continue
-            dist = nan_euclidean_distances(x.reshape(1,-1),data[i].reshape(1,-1))[0][0]
-            ## or u can also use the above distance function, both produce same answer
-            ## dist = nan_distance(x,data[i])
-            distances.append([dist, data[i][col]])
-        ## key=lambda x: x[0]  here x:x[0] signifies that we will sort this list using 
-        ## 1st(in python indexing starts from 0) column i.e. distance
-        distances.sort(key=lambda x: x[0])
-         ## Considering k closest points
-        distances = np.array(distances)
-        neighbors = []
-        for i in range(len(distances)):
-            if(np.isnan(distances[i,1])):
-                continue
-            neighbors.append(distances[i,1])
-            if(len(neighbors)==n_neighbors):  
-                break
-        ## replacing the nan with the mean of the closest points
-        adjusted_value = np.mean(neighbors)
-        final_data[row][col] = adjusted_value
-    
-    return(final_data)
     
 
-def optimized(data,n_neighbors = 2):
+def optimized_knn_imputation(data,n_neighbors = 2):
     count = 0
     ## Where are the null values in the data set
     indexes_nan = np.argwhere(np.isnan(data))
@@ -107,7 +67,6 @@ def optimized(data,n_neighbors = 2):
     final_data[row][col] = adjusted_value
     return(final_data)
     
-final = optimized(data,5)
-f = knn_imputation(data,5)
+final = optimized_knn_imputation(data,5)
 imputer = KNNImputer(n_neighbors=5)
 sklearn_out = imputer.fit_transform(data)
